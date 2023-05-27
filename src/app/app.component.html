@@ -1,8 +1,11 @@
 ﻿<!-- nav -->
 <nav class="navbar navbar-expand navbar-dark bg-dark px-3" *ngIf="user">
+    <a class="navbar-brand" href="#">
+        <img src="../assets/v2_1.png" width="40" height="40" class="d-inline-block align-top" alt="">
+    </a>
     <div class="navbar-nav">
         <a class="nav-item nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a>
-        <button class="btn btn-link nav-item nav-link" (click)="logout()">Logout</button>
+        <a class="nav-item nav-link" (click)="logout()">Logout</a>
     </div>
 </nav>
 
