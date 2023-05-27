@@ -1,0 +1,55 @@
+﻿<div class="card">
+    <h4 class="card-header">Register</h4>
+    <div class="card-body">
+        <form [formGroup]="form">
+            <div class="mb-3">
+                <label class="form-label">Name</label>
+                <input type="text" formControlName="name" class="form-control"
+                    [ngClass]="{ 'is-invalid': submitted && f.name.errors }" />
+                <div *ngIf="submitted && f.name.errors" class="invalid-feedback">
+                    <div *ngIf="f.name.errors.required">Name is required</div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Username</label>
+                <input type="text" formControlName="username" class="form-control"
+                    [ngClass]="{ 'is-invalid': submitted && f.username.errors }" />
+                <div *ngIf="submitted && f.username.errors" class="invalid-feedback">
+                    <div *ngIf="f.username.errors.required">Username is required</div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Private key</label>
+                <!-- <input type="text" formControlName="privateKey" class="form-control"
+                    [ngClass]="{ 'is-invalid': submitted && f.privateKey.errors }" /> -->
+                <file-upload formControlName="privateKey" class="form-control"
+                    [ngClass]="{ 'is-invalid': submitted && f.privateKey.errors }"></file-upload>
+                <div *ngIf="submitted && f.privateKey.errors" class="invalid-feedback">
+                    <div *ngIf="f.privateKey.errors.required">Private Key is required</div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Public key</label>
+                <!-- <input type="text" formControlName="publicKey" class="form-control"
+                    [ngClass]="{ 'is-invalid': submitted && f.publicKey.errors }" /> -->
+                <file-upload formControlName="publicKey" class="form-control"
+                    [ngClass]="{ 'is-invalid': submitted && f.publicKey.errors }"></file-upload>
+                <div *ngIf="submitted && f.publicKey.errors" class="invalid-feedback">
+                    <div *ngIf="f.publicKey.errors.required">Public Key is required</div>
+                </div>
+            </div>
+            <div>
+                <button [disabled]="registerDisabled" class="btn btn-primary" (click)="register()">
+                    <span *ngIf="loading" class="spinner-border spinner-border-sm me-1"></span>
+                    Register
+                </button>
+            </div>
+        </form>
+        <div *ngIf="registrationSuccess">
+            Registration success click here to <a href="/account/login">login</a>
+        </div>
+    </div>
+    <div *ngIf="userInfo" class="card-body">
+        <pre>{{userInfo | json }}</pre>
+    </div>
+</div>

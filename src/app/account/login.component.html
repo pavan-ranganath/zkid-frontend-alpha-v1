@@ -1,0 +1,61 @@
+﻿<div class="card">
+    <h4 class="card-header">Login</h4>
+    <div class="card-body">
+        <form [formGroup]="form">
+            <div class="mb-3">
+                <label class="form-label">Username</label>
+                <input type="text" formControlName="username" class="form-control"
+                    [ngClass]="{ 'is-invalid': submitted && f.username.errors }" />
+                <div *ngIf="submitted && f.username.errors" class="invalid-feedback">
+                    <div *ngIf="f.username.errors.required">Username is required</div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Private key</label>
+                <file-upload formControlName="privateKey" class="form-control"
+                    [ngClass]="{ 'is-invalid': submitted && f.privateKey.errors }"></file-upload>
+                <div *ngIf="submitted && f.privateKey.errors" class="invalid-feedback">
+                    <div *ngIf="f.privateKey.errors.required">Private key is required</div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Public Key</label>
+                <file-upload formControlName="publicKey" class="form-control"
+                    [ngClass]="{ 'is-invalid': submitted && f.publicKey.errors }"></file-upload>
+                <div *ngIf="submitted && f.publicKey.errors" class="invalid-feedback">
+                    <div *ngIf="f.publicKey.errors.required">Public key is required</div>
+                </div>
+            </div>
+            <div>
+                <button [disabled]="loginDisabled" class="btn btn-primary" (click)="login()">
+                    <span *ngIf="loading" class="spinner-border spinner-border-sm me-1"></span>
+                    Login
+                </button>
+            </div>
+            <span>
+                Don't have account yet? <a href="/account/register">Register</a>
+            </span>
+        </form>
+    </div>
+</div>
+<div *ngIf="usersFromStorage">
+    <div class="card text-center">
+        <div class="card-header clearfix">
+            OR
+        </div>
+    </div>
+    <div class="card">
+        <div class="row">
+            <div class="md-3">
+                <h4 class="card-header">Select user to login as</h4>
+                <div class="list-group">
+                    <a class="list-group-item clearfix " (click)="loginUsingStoredDetails(user);"
+                        *ngFor="let user of usersFromStorage">
+                        <h5 class="card-title">{{user.name}}</h5>
+                        {{user.username}}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

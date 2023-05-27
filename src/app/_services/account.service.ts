@@ -1,0 +1,114 @@
+﻿import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+import { environment } from '@environments/environment';
+import { User } from '@app/_models';
+
+@Injectable({ providedIn: 'root' })
+export class AccountService {
+    private userSubject: BehaviorSubject<User | null>;
+    private keyStoreSubject: BehaviorSubject<any | null> | undefined;
+
+    public user: Observable<User | null> | undefined;
+    public keyStore: Observable<any | null> | undefined;
+    constructor(
+        private router: Router,
+        private http: HttpClient
+    ) {
+        this.userSubject = new BehaviorSubject(JSON.parse(localStorage.getItem('currentLoggedInUser')!));
+        this.keyStoreSubject = new BehaviorSubject(sessionStorage.getItem('sharedKey'));
+        this.user = this.userSubject.asObservable();
+        this.keyStore = this.keyStoreSubject.asObservable();
+    }
+
+    public get userValue() {
+        return this.userSubject.value;
+    }
+    public get keyStoreValue() {
+        return this.keyStoreSubject!.value;
+    }
+    passKeyRegister(email: string) {
+        return this.http.get(`${environment.apiUrl}/v1/auth/generate-registration-options`, { params: { email: email } })
+    }
+    passKeyVerificationResp(opts: any) {
+        return this.http.post(`${environment.apiUrl}/v1/auth/verify-registration`, opts,);
+    }
+
+    passKeylogin(email: string) {
+        return this.http.get(`${environment.apiUrl}/v1/auth/generate-authentication-options`, { params: { email: email } })
+    }
+    passKeyLoginVerify(opts: any) {
+        return this.http.post(`${environment.apiUrl}/v1/auth/verify-authentication`, opts,);
+    }
+    logout() {
+        // remove user from local storage and set current user to null
+        localStorage.removeItem('currentLoggedInUser');
+        sessionStorage.clear()
+        this.userSubject.next(null);
+        this.router.navigate(['/account/login']);
+    }
+
+    register(user: User) {
+        return this.http.post(`${environment.apiUrl}/users/register`, user);
+    }
+
+    getAll() {
+        return this.http.get<User[]>(`${environment.apiUrl}/users`);
+    }
+
+    getById(id: string) {
+        return this.http.get<User>(`${environment.apiUrl}/users/${id}`);
+    }
+
+    update(id: string, params: any) {
+        return this.http.put(`${environment.apiUrl}/users/${id}`, params)
+            .pipe(map(x => {
+                // update stored user if the logged in user updated their own record
+                if (id == this.userValue?.id) {
+                    // update local storage
+                    const user = { ...this.userValue, ...params };
+                    localStorage.setItem('user', JSON.stringify(user));
+
+                    // publish updated user to subscribers
+                    this.userSubject.next(user);
+                }
+                return x;
+            }));
+    }
+
+    delete(id: string) {
+        return this.http.delete(`${environment.apiUrl}/users/${id}`)
+            .pipe(map(x => {
+                // auto logout if the logged in user deleted their own record
+                if (id == this.userValue?.id) {
+                    this.logout();
+                }
+                return x;
+            }));
+    }
+
+    entradaAuthRegister(opts: any) {
+        return this.http.post(`${environment.apiUrl}/v1/auth/generate-entrada-registration-options`, opts);
+    }
+    entradaAuthRegistrationVerification(opts: any) {
+        return this.http.post(`${environment.apiUrl}/v1/auth/verify-entrada-registration`, opts);
+    }
+
+    entradaAuthLogin(opts: any) {
+        return this.http.post(`${environment.apiUrl}/v1/auth/entrada-login`, opts);
+    }
+    public loginSuccess(user: User, sharedKey: any) {
+        localStorage.setItem('currentLoggedInUser', JSON.stringify(user));
+        sessionStorage.setItem('sharedKey',sharedKey);
+        this.userSubject.next(user);
+        // let userKeyStoreObj = JSON.parse(this.cookieStorage.getItem(user.username!)!)
+        // this.keyStoreSubject!.next(userKeyStoreObj);
+        return user;
+    }
+    verifyEmail(token: string) {
+        return this.http.post(`${environment.apiUrl}/v1/auth/verify-email?token=${token}`, null)
+    }
+}   
